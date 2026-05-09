@@ -4,8 +4,9 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 
-# macOS
+# macOS（任意子目录下的 Finder 索引文件，勿提交）
 .DS_Store
+**/.DS_Store
 
 # Swift PM
 .build/
