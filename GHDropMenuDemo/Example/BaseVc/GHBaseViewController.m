@@ -16,12 +16,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
-    
+
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     self.navigationItem.title = self.navTitle;
-    
+
     self.view.backgroundColor = [UIColor orangeColor];
-    
+
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"返回" style:UIBarButtonItemStylePlain target:self action:@selector(back)];
 
 }

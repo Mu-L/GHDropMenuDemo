@@ -10,8 +10,6 @@
 #import "UIView+Extension.h"
 #import "GHDropMenuHeader.h"
 
-#define kKeyWindow [UIApplication sharedApplication].keyWindow
-
 @interface GHCustomAlertView()
 @property (nonatomic , strong) UIDatePicker *picker;
 @property (nonatomic , copy) NSString *time;
@@ -44,7 +42,7 @@
 }
 
 - (void)setupDefault {
-    self.frame = [UIApplication sharedApplication].keyWindow.bounds;
+    self.frame = kGHKeyWindowBounds;
     self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:102.0/255];
     self.layer.opacity = 0.0;
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -58,18 +56,27 @@
 }
 
 - (void)show {
-    [kKeyWindow addSubview:self];
-    [self setCenter:kKeyWindow.center];
-    [kKeyWindow bringSubviewToFront:self];
+    UIWindow *window = kKeyWindow;
+    if (!window) {
+        return;
+    }
+    self.frame = window.bounds;
+    [window addSubview:self];
+    self.center = window.center;
+    [window bringSubviewToFront:self];
+    CGRect wb = window.bounds;
+    CGFloat winW = CGRectGetWidth(wb);
+    CGFloat winH = CGRectGetHeight(wb);
+    UIEdgeInsets inset = [UIApplication gh_safeAreaInsets];
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [self.layer setOpacity:1.0];
 
         if (self.positionType == GHCustomAlertViewPositionType_bottom) {
-            self.contentView.frame = CGRectMake(0, kGHScreenHeight - self.alertHeight, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, winH - self.alertHeight - inset.bottom, winW, self.alertHeight);
         } else if (self.positionType == GHCustomAlertViewPositionType_center) {
-            self.contentView.frame = CGRectMake(0, (kGHScreenHeight - self.alertHeight)*0.5, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, (winH - self.alertHeight) * 0.5, winW, self.alertHeight);
         } else if (self.positionType == GHCustomAlertViewPositionType_top) {
-            self.contentView.frame = CGRectMake(0, 0, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, inset.top, winW, self.alertHeight);
         }
  
     } completion:^(BOOL finished) {
@@ -80,13 +87,17 @@
 }
 
 - (void)dismiss {
+    CGRect wb = self.superview ? self.superview.bounds : kGHKeyWindowBounds;
+    CGFloat winW = CGRectGetWidth(wb);
+    CGFloat winH = CGRectGetHeight(wb);
+    UIEdgeInsets inset = [UIApplication gh_safeAreaInsets];
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
         if (self.positionType == GHCustomAlertViewPositionType_bottom) {
-            self.contentView.frame = CGRectMake(0, kGHScreenHeight, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, winH, winW, self.alertHeight);
         } else if (self.positionType == GHCustomAlertViewPositionType_center) {
-            self.contentView.frame = CGRectMake(0, kGHScreenHeight, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, winH, winW, self.alertHeight);
         } else if (self.positionType == GHCustomAlertViewPositionType_top) {
-            self.contentView.frame = CGRectMake(0, -self.alertHeight, kGHScreenWidth, self.alertHeight);
+            self.contentView.frame = CGRectMake(0, -self.alertHeight - inset.top, winW, self.alertHeight);
         }
     } completion:^(BOOL finished) {
         [self.layer setOpacity:0.0];

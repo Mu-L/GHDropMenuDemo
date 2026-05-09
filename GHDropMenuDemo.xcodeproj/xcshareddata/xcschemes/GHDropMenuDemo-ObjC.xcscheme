@@ -64,7 +64,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "GH_ROOT_DEMO"
-            value = "both"
+            value = "objc"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

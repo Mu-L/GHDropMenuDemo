@@ -8,25 +8,73 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
+#import "GHDropMenuDemo-Swift.h"
 
 @interface AppDelegate ()
+
+/// 由 Scheme → Run → Environment Variables 中的 GH_ROOT_DEMO 控制：objc | swift | both（默认 objc，真机/归档无变量时亦为 objc）
+- (UIViewController *)gh_makeRootViewController;
 
 @end
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
+
     UIWindow *window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
-    
+
     /** 如果发现项目打开空白,请把Target切换成GHDropMenuDemo后,编译 */
-    ViewController *vc = [[ViewController alloc]init];
-    UINavigationController *nav = [[UINavigationController alloc]initWithRootViewController:vc];
-    window.rootViewController = nav;
+    window.rootViewController = [self gh_makeRootViewController];
+
+    [self configureNavigationBar];
 
     self.window = window;
     [window makeKeyAndVisible];
     return YES;
+}
+
+- (UIViewController *)gh_makeRootViewController {
+    NSString *raw = [NSProcessInfo processInfo].environment[@"GH_ROOT_DEMO"];
+    NSString *flavor = raw.length ? raw.lowercaseString : @"objc";
+
+    if ([flavor isEqualToString:@"swift"]) {
+        SwiftDemoListViewController *swiftRoot = [[SwiftDemoListViewController alloc] init];
+        return [[UINavigationController alloc] initWithRootViewController:swiftRoot];
+    }
+    if ([flavor isEqualToString:@"both"] || [flavor isEqualToString:@"tab"]) {
+        ViewController *objcRoot = [[ViewController alloc] init];
+        UINavigationController *navObjc = [[UINavigationController alloc] initWithRootViewController:objcRoot];
+        navObjc.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Objective-C" image:nil tag:0];
+
+        SwiftDemoListViewController *swiftRoot = [[SwiftDemoListViewController alloc] init];
+        UINavigationController *navSwift = [[UINavigationController alloc] initWithRootViewController:swiftRoot];
+        navSwift.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Swift" image:nil tag:1];
+
+        UITabBarController *tab = [[UITabBarController alloc] init];
+        tab.viewControllers = @[navObjc, navSwift];
+        return tab;
+    }
+    // objc（含 GH_ROOT_DEMO=objc 或未设置）
+    ViewController *objcRoot = [[ViewController alloc] init];
+    return [[UINavigationController alloc] initWithRootViewController:objcRoot];
+}
+
+- (void)configureNavigationBar {
+    UINavigationBar *navBar = [UINavigationBar appearance];
+    navBar.tintColor = [UIColor blueColor];
+    UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+    [appearance configureWithOpaqueBackground];
+    appearance.backgroundColor = [UIColor whiteColor];
+    appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor blackColor]};
+    appearance.shadowColor = [UIColor clearColor];
+    navBar.standardAppearance = appearance;
+    navBar.scrollEdgeAppearance = appearance;
+    navBar.compactAppearance = appearance;
+    if (@available(iOS 15.0, *)) {
+        navBar.compactScrollEdgeAppearance = appearance;
+    }
+    UIBarButtonItem *barButtonItem = [UIBarButtonItem appearance];
+    [barButtonItem setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor blueColor]} forState:UIControlStateNormal];
 }
 
 

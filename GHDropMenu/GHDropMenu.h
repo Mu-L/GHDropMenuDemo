@@ -71,9 +71,10 @@ typedef void(^DropMenuFinishBlock)(void);
                          dropMenuTagArrayBlock: (DropMenuTagArrayBlock)dropMenuTagArrayBlock;
 
 /**
- 构造GHDropFilterMenu
+ 构造GHDropFilterMenu（全屏侧滑筛选）
  @param configuration 配置模型
  @param dropMenuTagArrayBlock 右侧筛选菜单回调
+ @note 创建后请将菜单 `frame` 设为所在页面 `bounds` 并 `addSubview` 到该页面，再调用 `show`。
  */
 + (instancetype)creatDropFilterMenuWidthConfiguration: (GHDropMenuModel *)configuration
          dropMenuTagArrayBlock: (DropMenuTagArrayBlock)dropMenuTagArrayBlock;

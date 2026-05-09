@@ -21,6 +21,34 @@
 #import "GHDropMenuFilterTimeChoseItem.h"
 #import "GHCustomAlertView.h"
 
+@class GHDropMenu;
+
+/// 挂在 window 上的弹出容器：避免全屏透明层挡住导航栏「返回」与未弹出时的页面触摸
+@interface GHPopupPassthroughHostView : UIView
+@property (nonatomic, weak) GHDropMenu *menuOwner;
+/// 为 YES 时整层不参与 hitTest（菜单未展开）
+@property (nonatomic, copy) BOOL (^isFullyPassthrough)(void);
+@end
+
+@implementation GHPopupPassthroughHostView
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    BOOL (^passthrough)(void) = self.isFullyPassthrough;
+    if (passthrough && passthrough()) {
+        return nil;
+    }
+    GHDropMenu *menu = self.menuOwner;
+    if (menu.superview) {
+        CGRect barRect = [menu convertRect:menu.bounds toView:self];
+        if (point.y < CGRectGetMaxY(barRect)) {
+            return nil;
+        }
+    }
+    return [super hitTest:point withEvent:event];
+}
+
+@end
+
 #pragma mark - - - -- - - -- - - -- - - -- - - -- - - -- - - -- - - -- - - - GHDropMenu 筛选菜单开始
 /** 按钮类型 */
 typedef NS_ENUM (NSUInteger,GHDropMenuButtonType) {
@@ -73,14 +101,20 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 @property (nonatomic , assign) GHDropMenuShowType dropMenuShowType;
 /** 标记菜单是否展开 */
 @property (nonatomic , assign) BOOL isShow;
-
+/// 下拉/遮罩挂载在所属 window 上的全屏容器（AutoLayout 用 frame+autoresizing 随 window 变化）
+@property (nonatomic , strong) UIView *ghPopupHostView;
+typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
+    GHDropMenuPresentationPhaseIdle = 0,
+    GHDropMenuPresentationPhaseExpanded,
+};
+@property (nonatomic , assign) GHDropMenuPresentationPhase presentationPhase;
 
 @end
 @implementation GHDropMenu
 #pragma mark - 初始化
 + (instancetype)creatDropFilterMenuWidthConfiguration: (GHDropMenuModel *)configuration
                                 dropMenuTagArrayBlock: (DropMenuTagArrayBlock)dropMenuTagArrayBlock {
-    GHDropMenu *dropMenu = [[GHDropMenu alloc]initWithFrame:CGRectMake(0,0, kGHScreenWidth, kGHScreenHeight)];
+    GHDropMenu *dropMenu = [[GHDropMenu alloc]initWithFrame:CGRectZero];
     dropMenu.dropMenuShowType = GHDropMenuShowTypeOnlyFilter;
     dropMenu.titles = configuration.titles.mutableCopy;
     dropMenu.dropMenuTagArrayBlock = dropMenuTagArrayBlock;
@@ -147,8 +181,7 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 }
 - (void)setTableY:(CGFloat)tableY {
     _tableY = tableY;
-    self.tableView.y = tableY;
-    self.titleCover.y = self.tableView.y;
+    [self gh_syncPopupFramesToHost];
 }
 - (void)setCellHeight:(CGFloat)cellHeight {
     _cellHeight = cellHeight;
@@ -247,6 +280,110 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     self.currentIndex = 0;
     self.cellHeight = 44;
     self.isShow = NO;
+    self.presentationPhase = GHDropMenuPresentationPhaseIdle;
+}
+
+- (UIWindow *)gh_resolveWindow {
+    if (self.window) {
+        return self.window;
+    }
+    return [UIApplication gh_keyWindow];
+}
+
+- (void)gh_ensureCommonPopupHost {
+    if (self.dropMenuShowType != GHDropMenuShowTypeCommon) {
+        return;
+    }
+    UIWindow *win = [self gh_resolveWindow];
+    if (!win) {
+        return;
+    }
+    if (!self.ghPopupHostView) {
+        GHPopupPassthroughHostView *hostView = [[GHPopupPassthroughHostView alloc] initWithFrame:win.bounds];
+        hostView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        hostView.userInteractionEnabled = YES;
+        hostView.backgroundColor = UIColor.clearColor;
+        hostView.menuOwner = self;
+        __weak typeof(self) weakSelf = self;
+        hostView.isFullyPassthrough = ^BOOL {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return YES;
+            }
+            return (BOOL)(!strongSelf.isShow && strongSelf.presentationPhase == GHDropMenuPresentationPhaseIdle);
+        };
+        self.ghPopupHostView = hostView;
+    } else {
+        self.ghPopupHostView.frame = win.bounds;
+    }
+    if (self.ghPopupHostView.superview != win) {
+        [win addSubview:self.ghPopupHostView];
+    }
+    [win bringSubviewToFront:self.ghPopupHostView];
+    UIView *host = self.ghPopupHostView;
+    if (self.filterCover.superview != host) {
+        [host addSubview:self.filterCover];
+    }
+    if (self.titleCover.superview != host) {
+        [host addSubview:self.titleCover];
+    }
+    if (self.tableView.superview != host) {
+        [host addSubview:self.tableView];
+    }
+}
+
+- (CGRect)gh_popupLayoutBounds {
+    if (self.dropMenuShowType == GHDropMenuShowTypeOnlyFilter) {
+        return self.bounds;
+    }
+    [self gh_ensureCommonPopupHost];
+    return self.ghPopupHostView.bounds;
+}
+
+- (void)didMoveToSuperview {
+    [super didMoveToSuperview];
+    if (self.superview && self.dropMenuShowType == GHDropMenuShowTypeCommon) {
+        [self gh_ensureCommonPopupHost];
+        [self gh_syncPopupFramesToHost];
+    }
+}
+
+- (UIViewController *)gh_presentingViewController {
+    for (UIResponder *r = self; r; r = r.nextResponder) {
+        if ([r isKindOfClass:[UIViewController class]]) {
+            return (UIViewController *)r;
+        }
+    }
+    return nil;
+}
+
+/// 底部 Home 条区域：优先用父视图（如 VC.view）的 safeArea，侧滑筛选与 window 高度不一致时也能贴底
+- (CGFloat)gh_effectiveSafeAreaBottom {
+    if (self.superview) {
+        return self.superview.safeAreaInsets.bottom;
+    }
+    return [UIApplication gh_safeAreaInsets].bottom;
+}
+
+/// 全屏/侧滑筛选（GHDropMenuTypeFilter）下白底面板 + 按钮 + 底部安全区延伸条
+- (void)gh_layoutFilterSheetChromeInContainerBounds:(CGRect)containerBounds {
+    if (self.bottomView.superview != self.filterCover) {
+        [self.filterCover addSubview:self.bottomView];
+    }
+    CGFloat winW = CGRectGetWidth(containerBounds);
+    CGFloat winH = CGRectGetHeight(containerBounds);
+    CGFloat safeBottom = [self gh_effectiveSafeAreaBottom];
+    CGFloat filterH = MAX(0, winH - kFilterButtonHeight - safeBottom);
+    self.filter.frame = CGRectMake(winW * 0.1f, 0, winW * 0.9f, filterH);
+    CGFloat btnY = CGRectGetMaxY(self.filter.frame);
+    self.reset.frame = CGRectMake(self.filter.frame.origin.x, btnY, self.filter.frame.size.width * 0.5f, kFilterButtonHeight);
+    self.sure.frame = CGRectMake(self.filter.frame.origin.x + self.filter.frame.size.width * 0.5f, btnY, self.filter.frame.size.width * 0.5f, kFilterButtonHeight);
+    self.sure.alpha = 1;
+    self.reset.alpha = 1;
+    self.bottomView.frame = CGRectMake(self.filter.frame.origin.x, CGRectGetMaxY(self.reset.frame), self.filter.frame.size.width, safeBottom);
+    self.bottomView.backgroundColor = [UIColor whiteColor];
+    [self.filterCover bringSubviewToFront:self.sure];
+    [self.filterCover bringSubviewToFront:self.reset];
 }
 
 #pragma mark - 消失
@@ -259,24 +396,31 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
         self.sure.alpha = 0;
         self.reset.alpha = 0;
     }
+    [self gh_syncPopupFramesToHost];
+    CGRect wb = [self gh_popupLayoutBounds];
+    CGFloat winW = CGRectGetWidth(wb);
+    CGFloat winH = CGRectGetHeight(wb);
+    CGFloat popupX = CGRectGetMinX(self.tableView.frame);
+    CGFloat popupW = CGRectGetWidth(self.tableView.frame);
     [UIView animateWithDuration:self.durationTime animations:^{
         if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 普通菜单 */) {
-            self.tableView.frame = CGRectMake(0, self.tableY , self.frame.size.width, 0);
-            self.titleCover.frame = CGRectMake(0, self.tableY, kGHScreenWidth, 0);
+            self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+            self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, 0);
         } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter /** 筛选菜单 */) {
-            self.filterCover.frame = CGRectMake(kGHScreenWidth, 0, kGHScreenWidth, kGHScreenHeight);
+            self.filterCover.frame = CGRectMake(winW, 0, winW, winH);
             
         }  else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeOptionCollection) {
-            self.filter.frame = CGRectMake(0, self.tableY, self.frame.size.width, 0);
-            self.titleCover.frame = CGRectMake(0, self.tableY, kGHScreenWidth, 0);
-            self.sure.frame = CGRectMake(0, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
-            self.reset.frame = CGRectMake(self.filter.width * .5, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
+            self.filter.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+            self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+            self.sure.frame = CGRectMake(popupX, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
+            self.reset.frame = CGRectMake(popupX + self.filter.width * .5, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
         }
     } completion:^(BOOL finished) {
         if (self.dropMenuShowType == GHDropMenuShowTypeOnlyFilter) {
             [self.layer setOpacity:0.0];
         }
         self.isShow = NO;
+        self.presentationPhase = GHDropMenuPresentationPhaseIdle;
         [self.tableView reloadData];
         [self.collectionView reloadData];
         
@@ -291,50 +435,58 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     if (self.dropMenuShowType == GHDropMenuShowTypeOnlyFilter) {
         [self.layer setOpacity:1];
     }
+    if (self.dropMenuShowType == GHDropMenuShowTypeCommon) {
+        [self gh_ensureCommonPopupHost];
+    }
+    [self gh_syncPopupFramesToHost];
+    CGRect wb = [self gh_popupLayoutBounds];
+    CGFloat winH = CGRectGetHeight(wb);
+    CGFloat popupX = CGRectGetMinX(self.tableView.frame);
+    CGFloat popupW = CGRectGetWidth(self.tableView.frame);
+    CGFloat titleCoverHeight = MAX(0.f, winH - self.tableY);
     GHDropMenuModel *dropMenuTitleModel = [self.titles by_ObjectAtIndex:self.currentIndex];
     if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 筛选菜单 */) {
         self.titleCover.backgroundColor = [UIColor clearColor];
-        self.filter.frame = CGRectMake(0, self.tableY, kGHScreenWidth, 0);
+        self.filter.frame = CGRectMake(popupX, self.tableY, popupW, 0);
         
     } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeOptionCollection) {
-        self.tableView.frame = CGRectMake(0, self.tableY, self.frame.size.width, 0);
-        [kKeyWindow addSubview:self.filter];
+        self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+        [self.ghPopupHostView addSubview:self.filter];
         
-        self.filter.frame =  CGRectMake(0, self.tableY, self.frame.size.width, 0);
-        [kKeyWindow addSubview:self.sure];
-        [kKeyWindow addSubview:self.reset];
-        self.reset.frame = CGRectMake(0, CGRectGetMaxY(self.filter.frame), kGHScreenWidth * 0.5, kFilterButtonHeight);
-        self.sure.frame = CGRectMake(kGHScreenWidth * .5, CGRectGetMaxY(self.filter.frame), kGHScreenWidth * 0.5, kFilterButtonHeight);
+        self.filter.frame =  CGRectMake(popupX, self.tableY, popupW, 0);
+        [self.ghPopupHostView addSubview:self.sure];
+        [self.ghPopupHostView addSubview:self.reset];
+        self.reset.frame = CGRectMake(popupX, CGRectGetMaxY(self.filter.frame), popupW * 0.5, kFilterButtonHeight);
+        self.sure.frame = CGRectMake(popupX + popupW * .5, CGRectGetMaxY(self.filter.frame), popupW * 0.5, kFilterButtonHeight);
         self.sure.alpha = 1;
         self.reset.alpha = 1;
         
     } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter) {
-        [self dismiss];
-        [kKeyWindow addSubview:self.filterCover];
+        /** 仅 Common 模式需要先 dismiss 并把遮罩挂到 window 的 host；OnlyFilter 若也 dismiss，completion 里会把 layer.opacity 置 0，侧滑面板展示结束后会整页消失 */
+        if (self.dropMenuShowType == GHDropMenuShowTypeCommon) {
+            [self dismiss];
+            [self.ghPopupHostView addSubview:self.filterCover];
+        }
         [self.filterCover addSubview:self.filter];
-        self.filter.frame = CGRectMake(kGHScreenWidth * 0.1, 0, kGHScreenWidth * 0.9, kGHScreenHeight - kFilterButtonHeight - kGHSafeAreaBottomHeight);
         [self.filterCover addSubview:self.sure];
         [self.filterCover addSubview:self.reset];
-        self.reset.frame = CGRectMake(self.filter.x, self.filter.frame.size.height, self.filter.width * 0.5, kFilterButtonHeight);
-        self.sure.frame = CGRectMake(self.filter.frame.size.width * 0.5 +kGHScreenWidth * 0.1 , CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
-        self.sure.alpha = 1;
-        self.reset.alpha = 1;
+        [self gh_layoutFilterSheetChromeInContainerBounds:wb];
     }
     [UIView animateWithDuration:self.durationTime animations:^{
         if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 普通菜单 */) {
-            self.tableView.frame = CGRectMake(0, self.tableY, self.frame.size.width, dropMenuTitleModel.dataArray.count * self.cellHeight);
-            self.titleCover.frame = CGRectMake(0, self.tableY, kGHScreenWidth, kGHScreenHeight - self.menuHeight - kGHSafeAreaTopHeight);
+            self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, dropMenuTitleModel.dataArray.count * self.cellHeight);
+            self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, titleCoverHeight);
             
         } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter /** 筛选菜单 */) {
-            self.tableView.frame = CGRectMake(0, self.tableY, self.frame.size.width, 0);
-            self.titleCover.frame = CGRectMake(0, self.tableY, self.frame.size.width, 0);
-            self.filterCover.frame = CGRectMake(0, 0, kGHScreenWidth, kGHScreenHeight);
+            self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+            self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, 0);
+            self.filterCover.frame = wb;
         }  else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeOptionCollection /** 筛选菜单 */) {
-            self.filter.frame =  CGRectMake(0, self.tableY, self.frame.size.width, 500);
-            self.titleCover.frame = CGRectMake(0, self.tableY, kGHScreenWidth, kGHScreenHeight - self.menuHeight - kGHSafeAreaTopHeight);
+            self.filter.frame =  CGRectMake(popupX, self.tableY, popupW, 500);
+            self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, titleCoverHeight);
             
-            self.reset.frame = CGRectMake(0, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
-            self.sure.frame = CGRectMake(self.filter.width * .5, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
+            self.reset.frame = CGRectMake(popupX, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
+            self.sure.frame = CGRectMake(popupX + self.filter.width * .5, CGRectGetMaxY(self.filter.frame), self.filter.width * 0.5, kFilterButtonHeight);
         }
     } completion:^(BOOL finished) {
         [UIView animateWithDuration:0.1 animations:^{
@@ -347,33 +499,63 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
             }
         } completion:^(BOOL finished) {
             self.isShow = YES;
+            self.presentationPhase = GHDropMenuPresentationPhaseExpanded;
+            if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter) {
+                CGRect b = (self.dropMenuShowType == GHDropMenuShowTypeOnlyFilter) ? self.bounds : self.ghPopupHostView.bounds;
+                [self gh_layoutFilterSheetChromeInContainerBounds:b];
+            }
         }];
     }];
 }
+
+- (void)gh_syncPopupFramesToHost {
+    if (self.dropMenuShowType != GHDropMenuShowTypeCommon) {
+        return;
+    }
+    [self gh_ensureCommonPopupHost];
+    UIView *host = self.ghPopupHostView;
+    if (!host || !self.superview) {
+        return;
+    }
+    CGRect barInHost = [self convertRect:self.bounds toView:host];
+    CGFloat popupY = CGRectGetMaxY(barInHost);
+    CGFloat popupW = CGRectGetWidth(barInHost);
+    CGFloat popupX = CGRectGetMinX(barInHost);
+    _tableY = popupY;
+    UITableView *tv = self.tableView;
+    CGFloat tableH = CGRectGetHeight(tv.frame);
+    tv.frame = CGRectMake(popupX, popupY, popupW, tableH);
+    UIControl *cover = self.titleCover;
+    CGFloat coverH = CGRectGetHeight(cover.frame);
+    cover.frame = CGRectMake(popupX, popupY, popupW, coverH);
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
-    self.collectionView.frame = CGRectMake(0, 0, kGHScreenWidth, self.menuHeight);
-    self.topLine.frame = CGRectMake(0, 0, kGHScreenWidth, 1);
-    self.bottomLine.frame = CGRectMake(0, self.menuHeight - 1, kGHScreenWidth, 1);
-    self.tableView.frame = CGRectMake(0, self.tableY, self.frame.size.width, 0);
+    CGFloat menuW = self.bounds.size.width;
+    self.collectionView.frame = CGRectMake(0, 0, menuW, self.menuHeight);
+    self.topLine.frame = CGRectMake(0, 0, menuW, 1);
+    self.bottomLine.frame = CGRectMake(0, self.menuHeight - 1, menuW, 1);
+    [self gh_syncPopupFramesToHost];
+    if (self.dropMenuShowType == GHDropMenuShowTypeOnlyFilter && self.isShow && self.presentationPhase == GHDropMenuPresentationPhaseExpanded) {
+        GHDropMenuModel *m = [self.titles by_ObjectAtIndex:self.currentIndex];
+        if (m.dropMenuType == GHDropMenuTypeFilter && self.filterCover.superview) {
+            self.filterCover.frame = self.bounds;
+            [self gh_layoutFilterSheetChromeInContainerBounds:self.bounds];
+        }
+    }
 }
 #pragma mark - 创建UI 添加控件
 - (void)setupUI {
     [self addSubview:self.collectionView];
-    [kKeyWindow addSubview:self.filterCover];
-    [kKeyWindow addSubview:self.titleCover];
-    [self.titleCover addSubview:self.sure];
-    [self.titleCover addSubview:self.reset];
+    [self.collectionView addSubview:self.bottomLine];
     [self.filterCover addSubview:self.filter];
     [self.filterCover addSubview:self.bottomView];
     [self.filterCover addSubview:self.sure];
     [self.filterCover addSubview:self.reset];
-    [self.collectionView addSubview:self.bottomLine];
-    [kKeyWindow addSubview:self.tableView];
 }
 
 - (void)setupFilterUI {
-    [kKeyWindow addSubview:self];
     [self addSubview:self.filterCover];
     [self.filterCover addSubview:self.filter];
     [self.filterCover addSubview:self.bottomView];
@@ -381,7 +563,8 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     [self.filterCover addSubview:self.reset];
 }
 - (void)closeMenu {
-    
+    [self.ghPopupHostView removeFromSuperview];
+    self.ghPopupHostView = nil;
     [self.tableView removeFromSuperview];
     [self.titleCover removeFromSuperview];
     [self.filter removeFromSuperview];
@@ -414,8 +597,12 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 - (void)dropMenuFilterEndInputItem:(GHDropMenuFilterInputItem *)item dropMenuModel:(GHDropMenuModel *)dropMenuModel {
     if (dropMenuModel.minPrice.length && dropMenuModel.maxPrice.length) {
         if (dropMenuModel.minPrice.doubleValue > dropMenuModel.maxPrice.doubleValue) {
-            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"最小价格不能大于最大价格,请重新选择" delegate:nil cancelButtonTitle:@"我知道了" otherButtonTitles:nil, nil];
-            [alert show];
+            UIViewController *presenter = [self gh_presentingViewController];
+            if (presenter) {
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"最小价格不能大于最大价格,请重新选择" preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"我知道了" style:UIAlertActionStyleDefault handler:nil]];
+                [presenter presentViewController:alert animated:YES completion:nil];
+            }
             dropMenuModel.minPrice = @"";
             dropMenuModel.maxPrice = @"";
             [self.filter reloadData];
@@ -549,8 +736,13 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     GHDropMenuModel *dropMenuTitleModel = [self.titles by_ObjectAtIndex:self.currentIndex];
     
     if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall) {
-        GHDropMenuWaterFallCell *cell = (GHDropMenuWaterFallCell *)[tableView.dataSource tableView:self.tableView cellForRowAtIndexPath:indexPath];
-        return [cell getCellHeight];
+        GHDropMenuModel *rowModel = [dropMenuTitleModel.dataArray by_ObjectAtIndex:indexPath.row];
+        NSInteger n = rowModel.waterFallTags.count;
+        if (n <= 0) {
+            return 44.f;
+        }
+        NSInteger rows = (n + 2) / 3;
+        return 16.f + rows * 36.f;
     } else {
         return 44;
     }
@@ -568,7 +760,8 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     
     if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall) {
         GHDropMenuWaterFallCell *cell = [tableView dequeueReusableCellWithIdentifier:@"GHDropMenuWaterFallCellID"];
-        cell.tags = dropMenuModel.waterFallTags;
+        NSArray *tags = dropMenuModel.waterFallTags;
+        cell.tags = tags ? [tags mutableCopy] : [NSMutableArray array];
         return cell;
   
     } else {
@@ -792,7 +985,6 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     if (_bottomView == nil) {
         _bottomView = [[UIView alloc]init];
         _bottomView.backgroundColor = [UIColor whiteColor];
-        _bottomView.frame = CGRectMake(self.filter.frame.origin.x, self.filter.frame.size.height + self.filter.frame.origin.y + kFilterButtonHeight,self.filter.frame.size.width , kGHSafeAreaBottomHeight);
     }
     return _bottomView;
 }
@@ -808,7 +1000,10 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 - (UIControl *)filterCover {
     if (_filterCover == nil) {
         _filterCover = [[UIControl alloc]init];
-        _filterCover.frame = CGRectMake(kGHScreenWidth, 0, kGHScreenWidth, kGHScreenHeight);
+        CGRect wb = kGHKeyWindowBounds;
+        CGFloat winW = CGRectGetWidth(wb);
+        CGFloat winH = CGRectGetHeight(wb);
+        _filterCover.frame = CGRectMake(winW, 0, winW, winH);
         [_filterCover addTarget:self action:@selector(clickControl) forControlEvents:UIControlEventTouchUpInside];
         _filterCover.backgroundColor = [UIColor clearColor];
     }
@@ -878,7 +1073,10 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 }
 - (UICollectionView *)filter {
     if (_filter == nil) {
-        _filter = [[UICollectionView alloc]initWithFrame:CGRectMake(kGHScreenWidth * 0.1, 0, kGHScreenWidth * 0.9, kGHScreenHeight - kFilterButtonHeight - kGHSafeAreaBottomHeight) collectionViewLayout:self.filterFlowLayout];
+        CGRect wb = kGHKeyWindowBounds;
+        CGFloat winW = CGRectGetWidth(wb);
+        CGFloat winH = CGRectGetHeight(wb);
+        _filter = [[UICollectionView alloc]initWithFrame:CGRectMake(winW * 0.1, 0, winW * 0.9, winH - kFilterButtonHeight - kGHSafeAreaBottomHeight) collectionViewLayout:self.filterFlowLayout];
         _filter.delegate = self;
         _filter.dataSource = self;
         _filter.contentInset = UIEdgeInsetsMake(20, 10, 0, 10);
@@ -926,6 +1124,7 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
 }
 
 - (void)dealloc {
+    [self.ghPopupHostView removeFromSuperview];
     NSLog(@"释放了");
 }
 @end

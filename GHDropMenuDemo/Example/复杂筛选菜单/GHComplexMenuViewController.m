@@ -18,9 +18,9 @@
 @implementation GHComplexMenuViewController
 
 - (void)viewDidLoad {
-    
+
     [super viewDidLoad];
-    
+
     [self style1];
 }
 - (void)back {
@@ -31,7 +31,8 @@
 }
 #pragma mark - 样式1
 - (void)style1 {
-    UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, kGHScreenWidth, 44)];
+    CGFloat topOffset = self.view.safeAreaInsets.top;
+    UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, topOffset, kGHScreenWidth, 44)];
     label.text = @"样式1";
     label.textColor = [UIColor whiteColor];
     [self.view addSubview:label];
@@ -39,16 +40,18 @@
     GHDropMenuModel *configuration = [[GHDropMenuModel alloc]init];
     /** 配置筛选菜单是否记录用户选中 默认NO */
     configuration.recordSeleted = NO;
-  
+
     /** 设置数据源 */
     configuration.titles = [configuration creaDropMenuData];
     /** 创建dropMenu 配置模型 && frame */
     weakself(self);
-    GHDropMenu *dropMenu = [GHDropMenu creatDropMenuWithConfiguration:configuration frame:CGRectMake(0, kGHSafeAreaTopHeight,kGHScreenWidth, 44) dropMenuTitleBlock:^(GHDropMenuModel * _Nonnull dropMenuModel) {
+    CGFloat dropMenuY = topOffset + 44;
+    GHDropMenu *dropMenu = [GHDropMenu creatDropMenuWithConfiguration:configuration frame:CGRectMake(0, dropMenuY, kGHScreenWidth, 44) dropMenuTitleBlock:^(GHDropMenuModel * _Nonnull dropMenuModel) {
         weakSelf.navigationItem.title = [NSString stringWithFormat:@"筛选结果: %@",dropMenuModel.title];
     } dropMenuTagArrayBlock:^(NSArray * _Nonnull tagArray) {
         [weakSelf getStrWith:tagArray];
     }];
+    dropMenu.tableY = dropMenuY + 44;
     dropMenu.titleSeletedImageName = @"up_normal";
     dropMenu.titleNormalImageName = @"down_normal";
     dropMenu.delegate = self;

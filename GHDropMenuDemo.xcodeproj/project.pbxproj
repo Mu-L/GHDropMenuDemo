@@ -39,6 +39,13 @@
 		D6A4ED9721E0873B0053D14F /* GHSuspendViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D6A4ECE321D793720053D14F /* GHSuspendViewController.m */; };
 		D6B85A8A21F36DF50082EE1D /* GHDropMenuWaterFallCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B85A8921F36DF50082EE1D /* GHDropMenuWaterFallCell.m */; };
 		D6D3396921E123F8005B86DB /* UILabel+GHome.m in Sources */ = {isa = PBXBuildFile; fileRef = D6D3396821E123F8005B86DB /* UILabel+GHome.m */; };
+		F100F001226050010053D14F /* UIApplication+GHSafeArea.m in Sources */ = {isa = PBXBuildFile; fileRef = F100F003226050010053D14F /* UIApplication+GHSafeArea.m */; };
+		B2B2B2B1226050030053D14F /* GHSuspendMenuHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = B2B2B2B3226050030053D14F /* GHSuspendMenuHeaderView.m */; };
+		C5E5E5E5226050060053D14F /* SwiftDemoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5E5EB226050060053D14F /* SwiftDemoListViewController.swift */; };
+		C5E5E5E6226050060053D14F /* SwiftComplexMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5E5EC226050060053D14F /* SwiftComplexMenuViewController.swift */; };
+		C5E5E5E7226050060053D14F /* SwiftNormalMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5E5ED226050060053D14F /* SwiftNormalMenuViewController.swift */; };
+		C5E5E5E8226050060053D14F /* SwiftSlipMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5E5EE226050060053D14F /* SwiftSlipMenuViewController.swift */; };
+		C5E5E5E9226050060053D14F /* SwiftDropMenuTagResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5E5EF226050060053D14F /* SwiftDropMenuTagResult.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +112,16 @@
 		D6B85A8921F36DF50082EE1D /* GHDropMenuWaterFallCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GHDropMenuWaterFallCell.m; sourceTree = "<group>"; };
 		D6D3396721E123F8005B86DB /* UILabel+GHome.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UILabel+GHome.h"; sourceTree = "<group>"; };
 		D6D3396821E123F8005B86DB /* UILabel+GHome.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UILabel+GHome.m"; sourceTree = "<group>"; };
+		F100F002226050010053D14F /* UIApplication+GHSafeArea.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIApplication+GHSafeArea.h"; sourceTree = "<group>"; };
+		F100F003226050010053D14F /* UIApplication+GHSafeArea.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIApplication+GHSafeArea.m"; sourceTree = "<group>"; };
+		B2B2B2B2226050030053D14F /* GHSuspendMenuHeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GHSuspendMenuHeaderView.h; sourceTree = "<group>"; };
+		B2B2B2B3226050030053D14F /* GHSuspendMenuHeaderView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GHSuspendMenuHeaderView.m; sourceTree = "<group>"; };
+		C5E5E5EA226050060053D14F /* GHDropMenuDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GHDropMenuDemo-Bridging-Header.h"; sourceTree = "<group>"; };
+		C5E5E5EB226050060053D14F /* SwiftDemoListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDemoListViewController.swift; sourceTree = "<group>"; };
+		C5E5E5EC226050060053D14F /* SwiftComplexMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftComplexMenuViewController.swift; sourceTree = "<group>"; };
+		C5E5E5ED226050060053D14F /* SwiftNormalMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftNormalMenuViewController.swift; sourceTree = "<group>"; };
+		C5E5E5EE226050060053D14F /* SwiftSlipMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSlipMenuViewController.swift; sourceTree = "<group>"; };
+		C5E5E5EF226050060053D14F /* SwiftDropMenuTagResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDropMenuTagResult.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +155,7 @@
 		D650CD7D21C35E0D00EC004A /* GHDropMenuDemo */ = {
 			isa = PBXGroup;
 			children = (
+				C5E5E5F0226050060053D14F /* Swift */,
 				D6A4ED2D21DA6B160053D14F /* Other */,
 				D6A4ECD121D790160053D14F /* Example */,
 				D650CD7E21C35E0D00EC004A /* AppDelegate.h */,
@@ -209,6 +227,8 @@
 			children = (
 				D6A4ECE221D793720053D14F /* GHSuspendViewController.h */,
 				D6A4ECE321D793720053D14F /* GHSuspendViewController.m */,
+				B2B2B2B2226050030053D14F /* GHSuspendMenuHeaderView.h */,
+				B2B2B2B3226050030053D14F /* GHSuspendMenuHeaderView.m */,
 				D6A4ECE521D79F750053D14F /* GHSuspendHeader.h */,
 				D6A4ECE621D79F750053D14F /* GHSuspendHeader.m */,
 				D6A4ECEC21D7B2E30053D14F /* GHSuspendItem.h */,
@@ -250,11 +270,24 @@
 		D6A4ED2D21DA6B160053D14F /* Other */ = {
 			isa = PBXGroup;
 			children = (
+				C5E5E5EA226050060053D14F /* GHDropMenuDemo-Bridging-Header.h */,
 				D650CD8921C35E0E00EC004A /* LaunchScreen.storyboard */,
 				D650CD8721C35E0E00EC004A /* Assets.xcassets */,
 				D650CD8C21C35E0E00EC004A /* Info.plist */,
 			);
 			path = Other;
+			sourceTree = "<group>";
+		};
+		C5E5E5F0226050060053D14F /* Swift */ = {
+			isa = PBXGroup;
+			children = (
+				C5E5E5EB226050060053D14F /* SwiftDemoListViewController.swift */,
+				C5E5E5EC226050060053D14F /* SwiftComplexMenuViewController.swift */,
+				C5E5E5ED226050060053D14F /* SwiftNormalMenuViewController.swift */,
+				C5E5E5EE226050060053D14F /* SwiftSlipMenuViewController.swift */,
+				C5E5E5EF226050060053D14F /* SwiftDropMenuTagResult.swift */,
+			);
+			path = Swift;
 			sourceTree = "<group>";
 		};
 		D6A4ED6D21DF7ADA0053D14F /* Cell */ = {
@@ -291,6 +324,8 @@
 				D6A4ED7021DF7B550053D14F /* UIView+Extension.m */,
 				D6D3396721E123F8005B86DB /* UILabel+GHome.h */,
 				D6D3396821E123F8005B86DB /* UILabel+GHome.m */,
+				F100F002226050010053D14F /* UIApplication+GHSafeArea.h */,
+				F100F003226050010053D14F /* UIApplication+GHSafeArea.m */,
 			);
 			path = Category;
 			sourceTree = "<group>";
@@ -387,6 +422,7 @@
 			files = (
 				D6A4ED9121DF97B50053D14F /* NSString+Arc4random.m in Sources */,
 				D6A4ED9721E0873B0053D14F /* GHSuspendViewController.m in Sources */,
+				B2B2B2B1226050030053D14F /* GHSuspendMenuHeaderView.m in Sources */,
 				D6A4ED3821DA7E090053D14F /* GHBaseNavigationController.m in Sources */,
 				D6A4ECF821DA2E5C0053D14F /* GHMeituanFoodViewController.m in Sources */,
 				D6A4ED8121DF801D0053D14F /* GHDropMenuOptionCell.m in Sources */,
@@ -412,8 +448,14 @@
 				D6B85A8A21F36DF50082EE1D /* GHDropMenuWaterFallCell.m in Sources */,
 				D6A4ED8B21DF84560053D14F /* GHDropMenuFilterInputItem.m in Sources */,
 				D6A4ED7521DF7B550053D14F /* UIView+Extension.m in Sources */,
+				F100F001226050010053D14F /* UIApplication+GHSafeArea.m in Sources */,
 				D6A4ED8E21DF84ED0053D14F /* GHDropMenuFilterTagItem.m in Sources */,
 				D6A4ED7E21DF7CFB0053D14F /* GHDropMenuModel.m in Sources */,
+				C5E5E5E5226050060053D14F /* SwiftDemoListViewController.swift in Sources */,
+				C5E5E5E6226050060053D14F /* SwiftComplexMenuViewController.swift in Sources */,
+				C5E5E5E7226050060053D14F /* SwiftNormalMenuViewController.swift in Sources */,
+				C5E5E5E8226050060053D14F /* SwiftSlipMenuViewController.swift in Sources */,
+				C5E5E5E9226050060053D14F /* SwiftDropMenuTagResult.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,7 +524,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -535,7 +577,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -556,13 +598,15 @@
 					DEVELOPMENT0,
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/GHDropMenuDemo/Other/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = GHome.GHDropMenuDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "GHDropMenuDemo/Other/GHDropMenuDemo-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -576,13 +620,15 @@
 				DEVELOPMENT_TEAM = KZ9JB9ZT4S;
 				GCC_PREPROCESSOR_DEFINITIONS = DEVELOPMENT0;
 				INFOPLIST_FILE = "$(SRCROOT)/GHDropMenuDemo/Other/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = GHome.GHDropMenuDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "GHDropMenuDemo/Other/GHDropMenuDemo-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

@@ -18,9 +18,9 @@
 @implementation GHSlipMenuViewController
 
 - (void)viewDidLoad {
-    
+
     [super viewDidLoad];
-    
+
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"筛选" style:UIBarButtonItemStylePlain target:self action:@selector(clickItem)];
     
     GHDropMenuModel *configuration = [[GHDropMenuModel alloc]init];
@@ -43,6 +43,9 @@
     dropMenu.delegate = self;
     dropMenu.durationTime = 0.5;
     self.dropMenu = dropMenu;
+    dropMenu.frame = self.view.bounds;
+    dropMenu.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:dropMenu];
     [dropMenu show];
 }
 

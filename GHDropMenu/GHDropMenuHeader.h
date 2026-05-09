@@ -8,6 +8,7 @@
 
 #ifndef GHDropMenuHeader_h
 #define GHDropMenuHeader_h
+#import "UIApplication+GHSafeArea.h"
 #define weakself(self)  __weak __typeof(self) weakSelf = self
 
 // ScreenWidth & kScreenHeight
@@ -17,18 +18,19 @@
 #define iPhoneXRAndXSMAX (kGHScreenWidth == 414.f && kGHScreenHeight == 896.f ? YES : NO)
 // iPhoneX
 #define iPhoneXAndXS (kGHScreenWidth == 375.f && kGHScreenHeight == 812.f ? YES : NO)
-#define kGHSafeAreaBottomHeight ((iPhoneXAndXS || iPhoneXRAndXSMAX) ?34 : 0)
+#define kGHSafeAreaBottomHeight ([UIApplication gh_safeAreaInsets].bottom)
 // StatusbarH + NavigationH
-#define kGHSafeAreaTopHeight ((iPhoneXAndXS || iPhoneXRAndXSMAX) ? 88.f : 64.f)
+#define kGHSafeAreaTopHeight ([UIApplication gh_safeAreaInsets].top + 44.f)
 // StatusBarHeight
-#define kStatusBarHeight ((iPhoneXAndXS || iPhoneXRAndXSMAX)  ? 44.f : 20.f)
+#define kStatusBarHeight ([UIApplication gh_safeAreaInsets].top)
 // NavigationBarHeigth
 #define kNavBarHeight 44.f
 // TabBarHeight
-#define kTabBarHeight  (iPhoneX ? (49.f+34.f) : 49.f)
+#define kTabBarHeight  (49.f + [UIApplication gh_safeAreaInsets].bottom)
 
-// KeyWindow
-#define kKeyWindow [UIApplication sharedApplication].keyWindow
+// KeyWindow（iOS 13+ Scene 下 keyWindow 可能为 nil，使用分类方法）
+#define kKeyWindow [UIApplication gh_keyWindow]
+#define kGHKeyWindowBounds [UIApplication gh_keyWindowBounds]
 
 // Rete
 #define kScreenWidthRete   kScreenWidth / 375.0 //比率

@@ -18,9 +18,9 @@
 @implementation GHNormalMenuViewController
 
 - (void)viewDidLoad {
-    
+
     [super viewDidLoad];
-    
+
     [self style1];
 }
 - (void)back {
@@ -29,13 +29,16 @@
 }
 #pragma mark - 样式1
 - (void)style1 {
-    
+
     weakself(self);
-    GHDropMenu *dropMenu = [GHDropMenu creatDropMenuWithConfiguration:nil frame:CGRectMake(0, kGHSafeAreaTopHeight,kGHScreenWidth, 44) dropMenuTitleBlock:^(GHDropMenuModel * _Nonnull dropMenuModel) {
+    CGFloat topOffset = self.view.safeAreaInsets.top;
+    CGFloat dropMenuY = topOffset;
+    GHDropMenu *dropMenu = [GHDropMenu creatDropMenuWithConfiguration:nil frame:CGRectMake(0, dropMenuY, kGHScreenWidth, 44) dropMenuTitleBlock:^(GHDropMenuModel * _Nonnull dropMenuModel) {
         weakSelf.navigationItem.title = [NSString stringWithFormat:@"筛选结果: %@",dropMenuModel.title];
     } dropMenuTagArrayBlock:^(NSArray * _Nonnull tagArray) {
         [weakSelf getStrWith:tagArray];
     }];
+    dropMenu.tableY = dropMenuY + 44;
     dropMenu.durationTime = 0.5;
     dropMenu.delegate = self;
     dropMenu.dataSource = self;

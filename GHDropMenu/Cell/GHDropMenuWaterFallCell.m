@@ -14,4 +14,13 @@
 
 @implementation GHDropMenuWaterFallCell
 
+- (CGFloat)getCellHeight {
+    NSInteger n = self.tags.count;
+    if (n <= 0) {
+        return 44.f;
+    }
+    NSInteger rows = (n + 2) / 3;
+    return 16.f + rows * 36.f;
+}
+
 @end
