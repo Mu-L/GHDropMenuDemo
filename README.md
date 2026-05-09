@@ -112,5 +112,3 @@ menu.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlex
 
 如有问题欢迎提 Issue；有帮助可以点个 Star。
 
-邮箱：`45329453@qq.com`  
-[作者简书](https://www.jianshu.com/u/884a67907187)
