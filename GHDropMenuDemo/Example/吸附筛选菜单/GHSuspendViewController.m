@@ -41,8 +41,8 @@
      forControlEvents:UIControlEventTouchUpInside] ;
     [button setTitle:@"模拟本地数据" forState:UIControlStateNormal];
     [button setTitle:@"模拟网络数据" forState:UIControlStateSelected];
-    [button setTitleColor:[UIColor blueColor] forState:UIControlStateSelected];
-    [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+    [button setTitleColor:kGHThemeAccentColor forState:UIControlStateSelected];
+    [button setTitleColor:kGHThemeAccentColor forState:UIControlStateNormal];
     self.button = button;
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:button];
 
@@ -135,7 +135,8 @@
     GHSuspendItem *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"GHSuspendItemID" forIndexPath:indexPath];
     cell.title.text = [NSString stringWithFormat:@"我是collectionView:%@",self.dataArray[indexPath.row]];
 
-    cell.backgroundColor = indexPath.row % 2 == 0 ? [UIColor redColor]:[UIColor purpleColor];
+    cell.title.textColor = kGHThemeTextColor;
+    cell.backgroundColor = indexPath.row % 2 == 0 ? [UIColor whiteColor]:kGHThemeBackgroundColor;
 
     return cell;
 }
@@ -150,14 +151,14 @@
     GHSuspendMenuHeaderView *view = [tableView dequeueReusableHeaderFooterViewWithIdentifier:@"GHSuspendMenuHeaderViewID"];
     CGFloat w = CGRectGetWidth(tableView.bounds);
     [view configureWithTableView:self.tableView section:section hostWidth:w delegate:self];
-    view.dropMenu.titleSeletedColor = [UIColor redColor];
-    view.dropMenu.titleNormalColor = [UIColor orangeColor];
+    view.dropMenu.titleSeletedColor = kGHThemeAccentColor;
+    view.dropMenu.titleNormalColor = kGHThemeTextColor;
     view.dropMenu.titleSeletedImageName = @"up_normal";
     view.dropMenu.titleNormalImageName = @"down_normal";
-    view.dropMenu.titleFont = [UIFont systemFontOfSize:11];
-    view.dropMenu.optionFont = [UIFont systemFontOfSize:20];
-    view.dropMenu.optionSeletedColor = [UIColor redColor];
-    view.dropMenu.optionNormalColor = [UIColor blueColor];
+    view.dropMenu.titleFont = [UIFont systemFontOfSize:14];
+    view.dropMenu.optionFont = [UIFont systemFontOfSize:15];
+    view.dropMenu.optionSeletedColor = kGHThemeAccentColor;
+    view.dropMenu.optionNormalColor = kGHThemeTextColor;
     view.backgroundView = ({
         UIView *bg = [[UIView alloc] initWithFrame:view.bounds];
         bg.backgroundColor = [UIColor whiteColor];
@@ -172,7 +173,8 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCellID"];
     cell.textLabel.text = [NSString stringWithFormat:@"我是tableView:%@",self.dataArray[indexPath.row]];
-    cell.backgroundColor = indexPath.row % 2 == 0 ? [UIColor yellowColor]:[UIColor brownColor];
+    cell.textLabel.textColor = kGHThemeTextColor;
+    cell.backgroundColor = indexPath.row % 2 == 0 ? [UIColor whiteColor]:kGHThemeBackgroundColor;
     return cell;
 }
 

@@ -145,14 +145,13 @@
     if (_sure == nil) {
         _sure = [[UIButton alloc]initWithFrame:CGRectMake(kGHScreenWidth - 15 - 60, 4, 60, 36)];
         [_sure setTitle:@"确定" forState:UIControlStateNormal];
-        [_sure setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
+        [_sure setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [_sure addTarget:self action:@selector(clickButton:) forControlEvents:UIControlEventTouchUpInside];
         _sure.tag = GHCustomAlertViewButtonType_sure;
         _sure.layer.masksToBounds = YES;
-        _sure.layer.borderWidth = 0.5;
-        _sure.layer.borderColor = [UIColor lightGrayColor].CGColor;
-        _sure.layer.cornerRadius = 5;
-        _sure.titleLabel.font = [UIFont systemFontOfSize:16];
+        _sure.backgroundColor = kGHThemeAccentColor;
+        _sure.layer.cornerRadius = 8;
+        _sure.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightSemibold];
 
     }
     return _sure;
@@ -161,14 +160,13 @@
     if (_cancel == nil) {
         _cancel = [[UIButton alloc]initWithFrame:CGRectMake(15, 4, 60, 36)];
         [_cancel setTitle:@"取消" forState:UIControlStateNormal];
-        [_cancel setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
+        [_cancel setTitleColor:kGHThemeSubTextColor forState:UIControlStateNormal];
         [_cancel addTarget:self action:@selector(clickButton:) forControlEvents:UIControlEventTouchUpInside];
         _cancel.tag = GHCustomAlertViewButtonType_cancel;
         _cancel.layer.masksToBounds = YES;
-        _cancel.layer.borderWidth = 0.5;
-        _cancel.layer.borderColor = [UIColor lightGrayColor].CGColor;
-        _cancel.layer.cornerRadius = 5;
-        _cancel.titleLabel.font = [UIFont systemFontOfSize:16];
+        _cancel.backgroundColor = kGHThemeBackgroundColor;
+        _cancel.layer.cornerRadius = 8;
+        _cancel.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
 
     }
     return _cancel;
@@ -187,7 +185,7 @@
 - (UIView *)line {
     if (_line == nil) {
         _line = [[UIView alloc]initWithFrame:CGRectMake(0, 44, kGHScreenWidth, 0.5)];
-        _line.backgroundColor = [UIColor lightGrayColor];
+        _line.backgroundColor = kGHThemeLineColor;
     }
     return _line;
 }
@@ -196,6 +194,9 @@
         _contentView = [[UIView alloc]initWithFrame:CGRectMake(0, kGHScreenHeight, kGHScreenWidth, self.alertHeight)];
         _contentView.backgroundColor =[UIColor whiteColor];
         _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        _contentView.layer.cornerRadius = 16;
+        _contentView.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
+        _contentView.layer.masksToBounds = YES;
     }
     return _contentView;
 }

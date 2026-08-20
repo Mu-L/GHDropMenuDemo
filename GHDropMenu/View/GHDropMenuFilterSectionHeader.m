@@ -81,7 +81,7 @@
         _details.textAlignment = NSTextAlignmentRight;
         _details.userInteractionEnabled = YES;
         _details.font = [UIFont boldSystemFontOfSize:11];
-        _details.textColor = [UIColor orangeColor];
+        _details.textColor = kGHThemeAccentColor;
         _details.text = @"全部";
     }
     return _details;
@@ -92,7 +92,7 @@
         _title.textAlignment = NSTextAlignmentLeft;
         _title.userInteractionEnabled = YES;
         _title.font = [UIFont boldSystemFontOfSize:14];
-        _title.textColor = [UIColor darkGrayColor];
+        _title.textColor = kGHThemeTextColor;
     }
     return _title;
 }

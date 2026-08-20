@@ -54,16 +54,16 @@
 - (UITextField *)rightTextField {
     if (_rightTextField == nil) {
         _rightTextField = [[UITextField alloc]init];
-        _rightTextField.layer.cornerRadius = 10;
+        _rightTextField.layer.cornerRadius = 8;
         _rightTextField.layer.masksToBounds = YES;
-        _rightTextField.layer.borderWidth = 0.5;
-        _rightTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
+        _rightTextField.layer.borderWidth = 1;
+        _rightTextField.layer.borderColor = kGHThemeLineColor.CGColor;
         _rightTextField.textAlignment = NSTextAlignmentCenter;
         _rightTextField.font = [UIFont systemFontOfSize:13];
-        _rightTextField.textColor = [UIColor darkGrayColor];
+        _rightTextField.textColor = kGHThemeTextColor;
         _rightTextField.placeholder = @"请输入结束日期";
         _rightTextField.keyboardType = UIKeyboardTypeNumberPad;
-        _rightTextField.tintColor = [UIColor orangeColor];
+        _rightTextField.tintColor = kGHThemeAccentColor;
         _rightTextField.delegate = self;
         _rightTextField.tag = GHDropMenuFilterTimeChoseItemTypeEndTime;
     }
@@ -73,17 +73,17 @@
 - (UITextField *)leftTextField {
     if (_leftTextField == nil) {
         _leftTextField = [[UITextField alloc]init];
-        _leftTextField.layer.cornerRadius = 10;
+        _leftTextField.layer.cornerRadius = 8;
         _leftTextField.tag = GHDropMenuFilterTimeChoseItemTypeBeginTime;
         _leftTextField.layer.masksToBounds = YES;
-        _leftTextField.layer.borderWidth = 0.5;
-        _leftTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
+        _leftTextField.layer.borderWidth = 1;
+        _leftTextField.layer.borderColor = kGHThemeLineColor.CGColor;
         _leftTextField.textAlignment = NSTextAlignmentCenter;
         _leftTextField.font = [UIFont systemFontOfSize:13];
-        _leftTextField.textColor = [UIColor darkGrayColor];
+        _leftTextField.textColor = kGHThemeTextColor;
         _leftTextField.placeholder = @"请输入开始日期";
         _leftTextField.keyboardType = UIKeyboardTypeNumberPad;
-        _leftTextField.tintColor = [UIColor orangeColor];
+        _leftTextField.tintColor = kGHThemeAccentColor;
         _leftTextField.delegate = self;
     }
     return _leftTextField;
@@ -91,8 +91,7 @@
 - (UIView *)line {
     if (_line == nil) {
         _line = [[UIView alloc]init];
-        _line.backgroundColor = [UIColor darkGrayColor];
-        _line.alpha = 0.5;
+        _line.backgroundColor = kGHThemeLineColor;
     }
     return _line;
 }

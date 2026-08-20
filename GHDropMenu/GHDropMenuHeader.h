@@ -44,6 +44,22 @@
 #define kFilterButtonHeight 44
 #define kFilterButtonWidth 44
 
+#pragma mark - GH 主题色（清新蓝紫）
+/** 主色 */
+#define kGHThemeAccentColor        [UIColor colorWithRed:99.0/255  green:102.0/255 blue:241.0/255 alpha:1]   // #6366F1
+/** 主色（深） */
+#define kGHThemeAccentDarkColor    [UIColor colorWithRed:79.0/255  green:70.0/255  blue:229.0/255 alpha:1]   // #4F46E5
+/** 主色（浅底） */
+#define kGHThemeAccentSoftColor    [UIColor colorWithRed:238.0/255 green:240.0/255 blue:255.0/255 alpha:1]   // #EEF0FF
+/** 页面背景 */
+#define kGHThemeBackgroundColor    [UIColor colorWithRed:245.0/255 green:246.0/255 blue:250.0/255 alpha:1]   // #F5F6FA
+/** 主文字 */
+#define kGHThemeTextColor          [UIColor colorWithRed:31.0/255  green:35.0/255  blue:51.0/255  alpha:1]   // #1F2333
+/** 次级文字 */
+#define kGHThemeSubTextColor       [UIColor colorWithRed:138.0/255 green:144.0/255 blue:166.0/255 alpha:1]   // #8A90A6
+/** 分割线 */
+#define kGHThemeLineColor          [UIColor colorWithRed:236.0/255 green:237.0/255 blue:243.0/255 alpha:1]   // #ECEDF3
+
 #import "UIView+Extension.h"
 
 #endif /* GHDropMenuHeader_h */

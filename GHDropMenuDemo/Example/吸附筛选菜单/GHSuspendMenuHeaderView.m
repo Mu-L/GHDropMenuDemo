@@ -35,14 +35,14 @@
                                             dropMenuTitleBlock:^(GHDropMenuModel *_Nonnull dropMenuModel) {
         } dropMenuTagArrayBlock:^(NSArray *_Nonnull tagArray) {
         }];
-        _dropMenu.titleSeletedColor = [UIColor redColor];
-        _dropMenu.titleNormalColor = [UIColor orangeColor];
+        _dropMenu.titleSeletedColor = kGHThemeAccentColor;
+        _dropMenu.titleNormalColor = kGHThemeTextColor;
         _dropMenu.titleSeletedImageName = @"up_normal";
         _dropMenu.titleNormalImageName = @"down_normal";
-        _dropMenu.titleFont = [UIFont systemFontOfSize:11];
-        _dropMenu.optionFont = [UIFont systemFontOfSize:20];
-        _dropMenu.optionSeletedColor = [UIColor redColor];
-        _dropMenu.optionNormalColor = [UIColor blueColor];
+        _dropMenu.titleFont = [UIFont systemFontOfSize:14];
+        _dropMenu.optionFont = [UIFont systemFontOfSize:15];
+        _dropMenu.optionSeletedColor = kGHThemeAccentColor;
+        _dropMenu.optionNormalColor = kGHThemeTextColor;
         _dropMenu.delegate = delegate;
         _dropMenu.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.contentView addSubview:_dropMenu];

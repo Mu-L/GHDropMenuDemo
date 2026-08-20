@@ -7,6 +7,7 @@
 //
 
 #import "GHBaseViewController.h"
+#import "GHDropMenuHeader.h"
 
 @interface GHBaseViewController ()
 
@@ -19,8 +20,9 @@
 
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.navigationItem.title = self.navTitle;
+    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 
-    self.view.backgroundColor = [UIColor orangeColor];
+    self.view.backgroundColor = kGHThemeBackgroundColor;
 
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"返回" style:UIBarButtonItemStylePlain target:self action:@selector(back)];
 

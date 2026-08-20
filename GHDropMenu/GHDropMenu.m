@@ -63,7 +63,7 @@ typedef NS_ENUM (NSUInteger,GHDropMenuShowType) {
     GHDropMenuShowTypeOnlyFilter,
 };
 
-@interface GHDropMenu()<UICollectionViewDelegate,UICollectionViewDataSource,UITableViewDataSource,UITableViewDelegate,GHDropMenuFilterTagItemDelegate,GHDropMenuFilterInputItemDelegate,GHDropMenuFilterSingleInputItemDelegate,GHDropMenuTitleItemDelegate,GHDropMenuFilterSectionHeaderDelegate,GHDropMenuFilterTimeChoseItemDelegate>
+@interface GHDropMenu()<UICollectionViewDelegate,UICollectionViewDataSource,UITableViewDataSource,UITableViewDelegate,GHDropMenuFilterTagItemDelegate,GHDropMenuFilterInputItemDelegate,GHDropMenuFilterSingleInputItemDelegate,GHDropMenuTitleItemDelegate,GHDropMenuFilterSectionHeaderDelegate,GHDropMenuFilterTimeChoseItemDelegate,GHDropMenuWaterFallCellDelegate>
 
 /** 顶部菜单 */
 @property (nonatomic , strong) UICollectionView *collectionView;
@@ -403,7 +403,8 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
     CGFloat popupX = CGRectGetMinX(self.tableView.frame);
     CGFloat popupW = CGRectGetWidth(self.tableView.frame);
     [UIView animateWithDuration:self.durationTime animations:^{
-        if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 普通菜单 */) {
+        if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle ||
+            dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall /** 普通菜单 / 瀑布流 */) {
             self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, 0);
             self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, 0);
         } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter /** 筛选菜单 */) {
@@ -445,7 +446,8 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
     CGFloat popupW = CGRectGetWidth(self.tableView.frame);
     CGFloat titleCoverHeight = MAX(0.f, winH - self.tableY);
     GHDropMenuModel *dropMenuTitleModel = [self.titles by_ObjectAtIndex:self.currentIndex];
-    if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 筛选菜单 */) {
+    if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle ||
+        dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall /** 普通菜单 / 瀑布流 */) {
         self.titleCover.backgroundColor = [UIColor clearColor];
         self.filter.frame = CGRectMake(popupX, self.tableY, popupW, 0);
         
@@ -473,8 +475,13 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
         [self gh_layoutFilterSheetChromeInContainerBounds:wb];
     }
     [UIView animateWithDuration:self.durationTime animations:^{
-        if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle /** 普通菜单 */) {
-            self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, dropMenuTitleModel.dataArray.count * self.cellHeight);
+        if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle ||
+            dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall /** 普通菜单 / 瀑布流 */) {
+            CGFloat tableHeight = dropMenuTitleModel.dataArray.count * self.cellHeight;
+            if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall) {
+                tableHeight = [self gh_waterFallTableHeight];
+            }
+            self.tableView.frame = CGRectMake(popupX, self.tableY, popupW, tableHeight);
             self.titleCover.frame = CGRectMake(popupX, self.tableY, popupW, titleCoverHeight);
             
         } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter /** 筛选菜单 */) {
@@ -492,7 +499,8 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
         [UIView animateWithDuration:0.1 animations:^{
             if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeFilter /** 筛选菜单 */) {
                 self.filterCover.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:102.0/255];
-            } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle) {
+            } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeTitle ||
+                       dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall) {
                 self.titleCover.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:102.0/255];
             } else if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeOptionCollection) {
                 self.titleCover.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:102.0/255];
@@ -506,6 +514,17 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
             }
         }];
     }];
+}
+
+- (CGFloat)gh_waterFallTableHeight {
+    GHDropMenuModel *titleModel = [self.titles by_ObjectAtIndex:self.currentIndex];
+    CGFloat total = 0;
+    for (NSInteger i = 0; i < titleModel.dataArray.count; i++) {
+        GHDropMenuModel *rowModel = [titleModel.dataArray by_ObjectAtIndex:i];
+        NSInteger n = rowModel.waterFallTags.count;
+        total += (n <= 0) ? 44.f : (16.f + ((n + 2) / 3) * 36.f);
+    }
+    return total;
 }
 
 - (void)gh_syncPopupFramesToHost {
@@ -759,9 +778,11 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
     dropMenuModel.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:dropMenuTitleModel.indexPath.row];
     
     if (dropMenuTitleModel.dropMenuType == GHDropMenuTypeWaterFall) {
-        GHDropMenuWaterFallCell *cell = [tableView dequeueReusableCellWithIdentifier:@"GHDropMenuWaterFallCellID"];
+        GHDropMenuWaterFallCell *cell = [tableView dequeueReusableCellWithIdentifier:@"GHDropMenuWaterFallCellID" forIndexPath:indexPath];
         NSArray *tags = dropMenuModel.waterFallTags;
         cell.tags = tags ? [tags mutableCopy] : [NSMutableArray array];
+        cell.delegate = self;
+        cell.selectedIndex = dropMenuModel.waterFallSelectedIndex;
         return cell;
   
     } else {
@@ -781,6 +802,10 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     GHDropMenuModel *dropMenuModel = [self.titles by_ObjectAtIndex: self.currentIndex];
+    /** 瀑布流标签在 cell 内部处理点击，整行点击这里忽略 */
+    if (dropMenuModel.dropMenuType == GHDropMenuTypeWaterFall) {
+        return;
+    }
     for (GHDropMenuModel *dropMenuContentModel in dropMenuModel.dataArray) {
         dropMenuContentModel.cellSeleted = NO;
     }
@@ -799,6 +824,27 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
         self.dropMenuTitleBlock(contentModel);
     }
     
+    [self resetMenuStatus];
+}
+#pragma mark - 瀑布流标签点击
+- (void)waterFallCell:(GHDropMenuWaterFallCell *)cell didSelectTagAtIndex:(NSInteger)index {
+    GHDropMenuModel *titleModel = [self.titles by_ObjectAtIndex:self.currentIndex];
+    GHDropMenuModel *rowModel = [titleModel.dataArray by_ObjectAtIndex:0];
+    NSString *tag = [rowModel.waterFallTags by_ObjectAtIndex:index];
+
+    rowModel.waterFallSelectedIndex = index;
+    rowModel.title = tag;
+    if (self.configuration.recordSeleted) {
+        titleModel.title = tag;
+    }
+
+    if (self.delegate && [self.delegate respondsToSelector:@selector(dropMenu:dropMenuTitleModel:)]) {
+        [self.delegate dropMenu:self dropMenuTitleModel:rowModel];
+    }
+    if (self.dropMenuTitleBlock) {
+        self.dropMenuTitleBlock(rowModel);
+    }
+
     [self resetMenuStatus];
 }
 #pragma mark - collectionViewDelegate
@@ -1014,13 +1060,13 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
         _reset = [[UIButton alloc]init];
         _reset.frame = CGRectMake(self.filter.frame.origin.x, self.filter.frame.size.height, self.filter.frame.size.width * 0.5, kFilterButtonHeight);
         _reset.backgroundColor = [UIColor whiteColor];
+        _reset.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
         [_reset setTitle:@"重置" forState:UIControlStateNormal];
-        [_reset setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+        [_reset setTitleColor:kGHThemeSubTextColor forState:UIControlStateNormal];
         [_reset addTarget:self action:@selector(clickButton:) forControlEvents:UIControlEventTouchUpInside];
         _reset.tag = GHDropMenuButtonTypeReset;
         UIView *line = [[UIView alloc]init];
-        line.backgroundColor = [UIColor lightGrayColor];
-        line.alpha = .1;
+        line.backgroundColor = kGHThemeLineColor;
         line.frame = CGRectMake(0, 0, _reset.frame.size.width, 1);
         [_reset addSubview:line];
         _reset.alpha = 0;
@@ -1031,7 +1077,8 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
     if (_sure == nil) {
         _sure = [[UIButton alloc]init];
         _sure.frame = CGRectMake(kGHScreenWidth - self.filter.frame.size.width * 0.5, self.filter.frame.size.height, self.filter.frame.size.width * 0.5, kFilterButtonHeight);
-        _sure.backgroundColor = [UIColor orangeColor];
+        _sure.backgroundColor = kGHThemeAccentColor;
+        _sure.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
         [_sure setTitle:@"确定" forState:UIControlStateNormal];
         [_sure setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         _sure.tag = GHDropMenuButtonTypeSure;
@@ -1046,8 +1093,11 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
         _tableView.delegate = self;
         _tableView.dataSource = self;
         _tableView.bounces = NO;
-        _tableView.backgroundColor = [UIColor clearColor];
+        _tableView.backgroundColor = [UIColor whiteColor];
         _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.layer.cornerRadius = 14;
+        _tableView.layer.maskedCorners = kCALayerMinXMaxYCorner | kCALayerMaxXMaxYCorner;
+        _tableView.layer.masksToBounds = YES;
         [_tableView registerClass:[GHDropMenuOptionCell class] forCellReuseIdentifier:@"GHDropMenuOptionCellID"];
         [_tableView registerClass:[GHDropMenuWaterFallCell class] forCellReuseIdentifier:@"GHDropMenuWaterFallCellID"];
     }
@@ -1109,16 +1159,14 @@ typedef NS_ENUM(NSInteger, GHDropMenuPresentationPhase) {
 - (UIView *)bottomLine {
     if (_bottomLine == nil) {
         _bottomLine = [[UIView alloc]init];
-        _bottomLine.backgroundColor = [UIColor darkGrayColor];
-        _bottomLine.alpha = .1;
+        _bottomLine.backgroundColor = kGHThemeLineColor;
     }
     return _bottomLine;
 }
 - (UIView *)topLine {
     if (_topLine == nil) {
         _topLine = [[UIView alloc]init];
-        _topLine.backgroundColor = [UIColor darkGrayColor];
-        _topLine.alpha = .1;
+        _topLine.backgroundColor = kGHThemeLineColor;
     }
     return _topLine;
 }

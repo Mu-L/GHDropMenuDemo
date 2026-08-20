@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "ViewController.h"
 #import "GHDropMenuDemo-Swift.h"
+#import "GHDropMenuHeader.h"
 
 @interface AppDelegate ()
 
@@ -61,11 +62,19 @@
 
 - (void)configureNavigationBar {
     UINavigationBar *navBar = [UINavigationBar appearance];
-    navBar.tintColor = [UIColor blueColor];
+    navBar.tintColor = kGHThemeAccentColor;
+
     UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
     [appearance configureWithOpaqueBackground];
     appearance.backgroundColor = [UIColor whiteColor];
-    appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor blackColor]};
+    appearance.titleTextAttributes = @{
+        NSForegroundColorAttributeName: kGHThemeTextColor,
+        NSFontAttributeName: [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold]
+    };
+    appearance.largeTitleTextAttributes = @{
+        NSForegroundColorAttributeName: kGHThemeTextColor,
+        NSFontAttributeName: [UIFont systemFontOfSize:32 weight:UIFontWeightBold]
+    };
     appearance.shadowColor = [UIColor clearColor];
     navBar.standardAppearance = appearance;
     navBar.scrollEdgeAppearance = appearance;
@@ -73,8 +82,20 @@
     if (@available(iOS 15.0, *)) {
         navBar.compactScrollEdgeAppearance = appearance;
     }
+
     UIBarButtonItem *barButtonItem = [UIBarButtonItem appearance];
-    [barButtonItem setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor blueColor]} forState:UIControlStateNormal];
+    [barButtonItem setTitleTextAttributes:@{NSForegroundColorAttributeName: kGHThemeAccentColor} forState:UIControlStateNormal];
+
+    UITabBar *tabBar = [UITabBar appearance];
+    tabBar.tintColor = kGHThemeAccentColor;
+    if (@available(iOS 15.0, *)) {
+        UITabBarAppearance *tabAppearance = [[UITabBarAppearance alloc] init];
+        [tabAppearance configureWithOpaqueBackground];
+        tabAppearance.backgroundColor = [UIColor whiteColor];
+        tabAppearance.shadowColor = [UIColor clearColor];
+        tabBar.standardAppearance = tabAppearance;
+        tabBar.scrollEdgeAppearance = tabAppearance;
+    }
 }
 
 

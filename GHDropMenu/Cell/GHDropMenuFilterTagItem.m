@@ -17,8 +17,15 @@
 - (void)setDropMenuModel:(GHDropMenuModel *)dropMenuModel {
     _dropMenuModel = dropMenuModel;
     self.title.text = dropMenuModel.tagName;
-    self.title.backgroundColor = dropMenuModel.tagSeleted ? [UIColor orangeColor]:[UIColor whiteColor];
-    self.title.textColor = dropMenuModel.tagSeleted ?[UIColor whiteColor]:[UIColor darkGrayColor];
+    if (dropMenuModel.tagSeleted) {
+        self.title.backgroundColor = kGHThemeAccentColor;
+        self.title.textColor = [UIColor whiteColor];
+        self.title.layer.borderColor = kGHThemeAccentColor.CGColor;
+    } else {
+        self.title.backgroundColor = [UIColor whiteColor];
+        self.title.textColor = kGHThemeSubTextColor;
+        self.title.layer.borderColor = kGHThemeLineColor.CGColor;
+    }
 }
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self == [super initWithFrame:frame]) {
@@ -30,7 +37,7 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     self.title.frame = CGRectMake(0, 0, self.frame.size.width , self.frame.size.height);
-    
+    self.title.layer.cornerRadius = self.frame.size.height * 0.5;
 }
 - (void)setupUI {
     [self addSubview:self.title];
@@ -49,9 +56,10 @@
         _title.userInteractionEnabled = YES;
         _title.text = @"1";
         _title.layer.masksToBounds = YES;
-        _title.layer.cornerRadius = 10;
-        _title.layer.borderColor = [UIColor lightGrayColor].CGColor;
-        _title.layer.borderWidth = 0.5;
+        _title.layer.cornerRadius = 15;
+        _title.layer.borderColor = kGHThemeLineColor.CGColor;
+        _title.layer.borderWidth = 1;
+        _title.textColor = kGHThemeSubTextColor;
         _title.font = [UIFont systemFontOfSize:13];
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tap:)];
         tap.numberOfTouchesRequired = 1;

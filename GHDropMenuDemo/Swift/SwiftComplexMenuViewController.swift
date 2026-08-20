@@ -13,8 +13,10 @@ final class SwiftComplexMenuViewController: GHBaseViewController, GHDropMenuDele
         super.viewDidLoad()
         let top = view.safeAreaInsets.top
         let label = UILabel(frame: CGRect(x: 0, y: top, width: UIScreen.main.bounds.width, height: 44))
-        label.text = "样式1 (Swift)"
-        label.textColor = .white
+        label.text = "标题栏 + 下拉列表 + 右侧复杂筛选"
+        label.textColor = UIColor(red: 138.0/255, green: 144.0/255, blue: 166.0/255, alpha: 1)
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 13)
         view.addSubview(label)
 
         let configuration = GHDropMenuModel()

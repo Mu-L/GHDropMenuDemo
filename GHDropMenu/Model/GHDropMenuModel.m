@@ -454,4 +454,51 @@
     }
     return titlesArray;
 }
+
+/** 美团样式（含瀑布流标签）筛选菜单数据 */
+- (NSMutableArray *)creaMeituanDropMenuData {
+    /** 第 1 列：综合排序（普通下拉列表） */
+    NSArray *sortTitles = @[@"综合排序", @"销量最高", @"距离最近", @"好评优先", @"起送价最低"];
+    NSMutableArray *sortArray = [NSMutableArray array];
+    for (NSInteger i = 0; i < sortTitles.count; i++) {
+        GHDropMenuModel *model = [[GHDropMenuModel alloc] init];
+        model.title = [sortTitles by_ObjectAtIndex:i];
+        [sortArray addObject:model];
+    }
+
+    /** 第 2 列：价格（瀑布流标签） */
+    NSArray *priceTags = @[@"不限", @"0-10元", @"10-20元", @"20-30元", @"30-50元", @"50-100元", @"100元以上"];
+    GHDropMenuModel *priceModel = [[GHDropMenuModel alloc] init];
+    priceModel.waterFallTags = priceTags;
+    priceModel.waterFallSelectedIndex = 0;
+    NSMutableArray *priceArray = [NSMutableArray arrayWithObject:priceModel];
+
+    /** 第 3 列：品牌（瀑布流标签） */
+    NSArray *brandTags = @[@"全部", @"肯德基", @"麦当劳", @"必胜客", @"汉堡王", @"华莱士", @"德克士", @"星巴克", @"瑞幸咖啡"];
+    GHDropMenuModel *brandModel = [[GHDropMenuModel alloc] init];
+    brandModel.waterFallTags = brandTags;
+    brandModel.waterFallSelectedIndex = 0;
+    NSMutableArray *brandArray = [NSMutableArray arrayWithObject:brandModel];
+
+    NSMutableArray *titlesArray = [NSMutableArray array];
+    NSArray *titles = @[@"综合排序", @"价格", @"品牌"];
+    NSArray *types = @[@(GHDropMenuTypeTitle), @(GHDropMenuTypeWaterFall), @(GHDropMenuTypeWaterFall)];
+
+    for (NSInteger i = 0; i < titles.count; i++) {
+        GHDropMenuModel *model = [[GHDropMenuModel alloc] init];
+        model.title = titles[i];
+        model.dropMenuType = [types[i] integerValue];
+        if (i == 0) {
+            model.dataArray = sortArray;
+        } else if (i == 1) {
+            model.dataArray = priceArray;
+        } else {
+            model.dataArray = brandArray;
+        }
+        model.identifier = i;
+        model.indexPath = [NSIndexPath indexPathForRow:0 inSection:i];
+        [titlesArray addObject:model];
+    }
+    return titlesArray;
+}
 @end

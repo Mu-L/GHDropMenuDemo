@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "GHDropMenuHeader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 /** 菜单类型 */
@@ -35,6 +36,8 @@ typedef NS_ENUM (NSUInteger,GHDropMenuType ) {
 /** 筛选菜单模型 */
 @interface GHDropMenuModel : NSObject
 @property (nonatomic , strong) NSArray *waterFallTags;
+/** 瀑布流标签选中索引（-1 表示未选中） */
+@property (nonatomic , assign) NSInteger waterFallSelectedIndex;
 /** menu菜单的最大宽度 */
 @property (nonatomic , assign) CGFloat menuWidth;
 /** 每行多少个 */
@@ -110,6 +113,8 @@ typedef NS_ENUM (NSUInteger,GHDropMenuType ) {
 - (NSMutableArray *)creaFilterDropMenuData;
 - (NSMutableArray *)creatNormalDropMenuData;
 - (NSMutableArray *)creatRandomDropMenuData;
+/** 构造美团样式（含瀑布流）筛选菜单数据 */
+- (NSMutableArray *)creaMeituanDropMenuData;
 
 @end
 

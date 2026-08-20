@@ -7,11 +7,12 @@
 //
 
 #import "GHCollectionReusableView.h"
+#import "GHDropMenuHeader.h"
 
 @implementation GHCollectionReusableView
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self == [super initWithFrame:frame]) {
-        self.backgroundColor = [UIColor orangeColor];
+        self.backgroundColor = kGHThemeAccentSoftColor;
     }
     return self;
 }

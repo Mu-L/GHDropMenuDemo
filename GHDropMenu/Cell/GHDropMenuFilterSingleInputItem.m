@@ -51,15 +51,15 @@
 - (UITextField *)textField {
     if (_textField == nil) {
         _textField = [[UITextField alloc]init];
-        _textField.layer.cornerRadius = 10;
+        _textField.layer.cornerRadius = 8;
         _textField.layer.masksToBounds = YES;
-        _textField.layer.borderWidth = 0.5;
-        _textField.layer.borderColor = [UIColor lightGrayColor].CGColor;
+        _textField.layer.borderWidth = 1;
+        _textField.layer.borderColor = kGHThemeLineColor.CGColor;
         _textField.textAlignment = NSTextAlignmentCenter;
         _textField.font = [UIFont systemFontOfSize:13];
-        _textField.textColor = [UIColor darkGrayColor];
+        _textField.textColor = kGHThemeTextColor;
         _textField.keyboardType = UIKeyboardTypeNumberPad;
-        _textField.tintColor = [UIColor orangeColor];
+        _textField.tintColor = kGHThemeAccentColor;
         _textField.placeholder = @"请输入";
     }
     return _textField;

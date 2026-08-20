@@ -20,11 +20,11 @@
   
     CGFloat maxWidth = [UIScreen mainScreen].bounds.size.width / 4;
     if (dropMenuModel.titleSeleted) {
-        self.label.textColor = dropMenuModel.titleSeletedColor;
+        self.label.textColor = dropMenuModel.titleSeletedColor ?: kGHThemeAccentColor;
         [self.label creatRichTextWithText:dropMenuModel.title frame:CGRectMake(0, 0, 40, 44) font:[UIFont systemFontOfSize:16] imageName:dropMenuModel.titleSeletedImageName maxWidth:maxWidth];
 
     } else {
-        self.label.textColor = dropMenuModel.titleNormalColor;//
+        self.label.textColor = dropMenuModel.titleNormalColor ?: kGHThemeTextColor;//
         [self.label creatRichTextWithText:dropMenuModel.title frame:CGRectMake(0, 0, 40, 44) font:[UIFont systemFontOfSize:16] imageName:dropMenuModel.titleNormalImageName maxWidth:maxWidth];
     }
 }

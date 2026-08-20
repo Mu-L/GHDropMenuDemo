@@ -21,7 +21,7 @@
 - (void)setDropMenuModel:(GHDropMenuModel *)dropMenuModel {
     _dropMenuModel = dropMenuModel;
     self.title.text = dropMenuModel.title;
-    self.title.textColor = dropMenuModel.cellSeleted ? dropMenuModel.optionSeletedColor:dropMenuModel.optionNormalColor;
+    self.title.textColor = dropMenuModel.cellSeleted ? (dropMenuModel.optionSeletedColor ?: kGHThemeAccentColor) : (dropMenuModel.optionNormalColor ?: kGHThemeTextColor);
     self.imgView.hidden = !dropMenuModel.cellSeleted;
     self.title.font = dropMenuModel.optionFont > 0 ?dropMenuModel.optionFont :[UIFont systemFontOfSize:15];
 }
@@ -55,8 +55,7 @@
 - (UIView *)line {
     if (_line == nil) {
         _line = [[UIView alloc]init];
-        _line.backgroundColor = [UIColor darkGrayColor];
-        _line.alpha = .1;
+        _line.backgroundColor = kGHThemeLineColor;
     }
     return _line;
 }

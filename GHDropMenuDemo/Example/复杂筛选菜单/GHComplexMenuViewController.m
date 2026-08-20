@@ -33,8 +33,10 @@
 - (void)style1 {
     CGFloat topOffset = self.view.safeAreaInsets.top;
     UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, topOffset, kGHScreenWidth, 44)];
-    label.text = @"样式1";
-    label.textColor = [UIColor whiteColor];
+    label.text = @"标题栏 + 下拉列表 + 右侧复杂筛选";
+    label.textColor = kGHThemeSubTextColor;
+    label.textAlignment = NSTextAlignmentCenter;
+    label.font = [UIFont systemFontOfSize:13];
     [self.view addSubview:label];
     /** 配置筛选菜单模型 */
     GHDropMenuModel *configuration = [[GHDropMenuModel alloc]init];
